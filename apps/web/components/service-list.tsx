@@ -17,6 +17,7 @@ import type {
   ServiceData,
   ServicesResponse,
   SpinUpFormData,
+  ServiceCreateResponse,
 } from "@/lib/types/railway";
 import { RefreshCw, Plus } from "lucide-react";
 
@@ -100,22 +101,38 @@ export function ServiceList({
   };
 
   const handleSpinUp = async (formData: SpinUpFormData) => {
-    const { serviceName, sourceType, sourceValue, ttl, customTTL } = formData;
+    try {
+      const { serviceName, sourceType, sourceValue, ttl, customTTL } = formData;
 
-    await fetch("/api/services", {
-      method: "POST",
-      body: JSON.stringify({
-        projectId,
-        environmentId,
-        serviceName,
-        sourceType,
-        sourceValue,
-        ttl,
-        customTTL,
-      }),
-    });
+      const response = await fetch("/api/services", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          projectId,
+          environmentId,
+          serviceName,
+          sourceType,
+          sourceValue,
+          ttl,
+          customTTL,
+        }),
+      });
 
-    await fetchServices();
+      const result: ServiceCreateResponse = await response.json();
+
+      if (!result.success) {
+        throw new Error(result.error || "Failed to create service");
+      }
+
+      await fetchServices();
+    } catch (error) {
+      console.error("Error creating service:", error);
+      setError(
+        error instanceof Error ? error.message : "Failed to create service"
+      );
+    }
   };
 
   if (loading) {
