@@ -22,8 +22,8 @@ export class GraphQLClientError extends Error {
 }
 
 /**
- * Fetch GraphQL data from Railway API
- * This should only be called from server-side code (API routes, server components)
+ * fetch GraphQL data from Railway API
+ * !this should only be called from server-side code (API routes, server components, server actions)
  */
 export async function fetchGraphQL<TResult, TVariables>(
   document: TypedDocumentString<TResult, TVariables>,
