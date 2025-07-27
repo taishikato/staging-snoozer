@@ -12,8 +12,13 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import type { ServiceData, ServicesResponse } from "@/lib/types/railway";
-import { RefreshCw } from "lucide-react";
+import { SpinUpModal } from "@/components/spin-up-modal";
+import type {
+  ServiceData,
+  ServicesResponse,
+  SpinUpFormData,
+} from "@/lib/types/railway";
+import { RefreshCw, Plus } from "lucide-react";
 
 type ServiceListProps = {
   environmentId: string;
@@ -27,6 +32,7 @@ export function ServiceList({
   const [services, setServices] = useState<ServiceData[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [showSpinUpModal, setShowSpinUpModal] = useState(false);
 
   const fetchServices = async () => {
     try {
@@ -91,6 +97,15 @@ export function ServiceList({
     return date.toLocaleDateString();
   };
 
+  const handleSpinUp = (formData: SpinUpFormData) => {
+    console.log("Spinning up service:", formData);
+    // TODO: Implement actual service creation API call
+    // For now, just refresh the services list after a delay
+    setTimeout(() => {
+      fetchServices();
+    }, 1000);
+  };
+
   if (loading) {
     return (
       <div className="w-full space-y-4">
@@ -137,6 +152,14 @@ export function ServiceList({
           <h2 className="text-xl font-semibold">
             Services in {environmentName}
           </h2>
+          <Button
+            onClick={() => setShowSpinUpModal(true)}
+            variant="default"
+            size="sm"
+          >
+            <Plus className="mr-2 size-4" />
+            Spin Up Service
+          </Button>
         </div>
         <div className="rounded-md border border-red-200 bg-red-50 p-6 text-center">
           <p className="text-red-800 mb-4">{error}</p>
@@ -145,6 +168,13 @@ export function ServiceList({
             Retry
           </Button>
         </div>
+
+        <SpinUpModal
+          open={showSpinUpModal}
+          onOpenChange={setShowSpinUpModal}
+          onSubmit={handleSpinUp}
+          environmentName={environmentName}
+        />
       </div>
     );
   }
@@ -156,10 +186,20 @@ export function ServiceList({
           <h2 className="text-xl font-semibold">
             Services in {environmentName}
           </h2>
-          <Button onClick={fetchServices} variant="outline" size="sm">
-            <RefreshCw className="mr-2 h-4 w-4" />
-            Refresh
-          </Button>
+          <div className="flex gap-2">
+            <Button onClick={fetchServices} variant="outline" size="sm">
+              <RefreshCw className="mr-2 h-4 w-4" />
+              Refresh
+            </Button>
+            <Button
+              onClick={() => setShowSpinUpModal(true)}
+              variant="default"
+              size="sm"
+            >
+              <Plus className="mr-2 size-4" />
+              Spin Up Service
+            </Button>
+          </div>
         </div>
         <div className="rounded-md border border-gray-200 bg-gray-50 p-8 text-center">
           <p className="text-gray-600 mb-2">
@@ -170,6 +210,13 @@ export function ServiceList({
             environment.
           </p>
         </div>
+
+        <SpinUpModal
+          open={showSpinUpModal}
+          onOpenChange={setShowSpinUpModal}
+          onSubmit={handleSpinUp}
+          environmentName={environmentName}
+        />
       </div>
     );
   }
@@ -178,10 +225,20 @@ export function ServiceList({
     <div className="w-full space-y-4">
       <div className="flex items-center justify-between">
         <h2 className="text-xl font-semibold">Services in {environmentName}</h2>
-        <Button onClick={fetchServices} variant="outline" size="sm">
-          <RefreshCw className="mr-2 h-4 w-4" />
-          Refresh
-        </Button>
+        <div className="flex gap-2">
+          <Button onClick={fetchServices} variant="outline" size="sm">
+            <RefreshCw className="mr-2 h-4 w-4" />
+            Refresh
+          </Button>
+          <Button
+            onClick={() => setShowSpinUpModal(true)}
+            variant="default"
+            size="sm"
+          >
+            <Plus className="mr-2 size-4" />
+            Spin Up Service
+          </Button>
+        </div>
       </div>
       <div className="rounded-md border">
         <Table>
@@ -209,6 +266,13 @@ export function ServiceList({
           </TableBody>
         </Table>
       </div>
+
+      <SpinUpModal
+        open={showSpinUpModal}
+        onOpenChange={setShowSpinUpModal}
+        onSubmit={handleSpinUp}
+        environmentName={environmentName}
+      />
     </div>
   );
 }

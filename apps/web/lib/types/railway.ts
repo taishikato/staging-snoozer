@@ -29,3 +29,14 @@ export type ServicesResponse = {
   services?: ServiceData[];
   error?: string;
 };
+
+export type SourceType = "github" | "docker" | "template";
+export type TTLOption = "1h" | "6h" | "24h" | "1w" | "custom";
+
+export type SpinUpFormData = {
+  serviceName: string;
+  sourceType: SourceType;
+  sourceValue: string;
+  ttl?: TTLOption;
+  customTTL?: number; // in hours
+};
