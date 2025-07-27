@@ -21,11 +21,13 @@ import type {
 import { RefreshCw, Plus } from "lucide-react";
 
 type ServiceListProps = {
+  projectId: string;
   environmentId: string;
   environmentName: string;
 };
 
 export function ServiceList({
+  projectId,
   environmentId,
   environmentName,
 }: ServiceListProps) {
@@ -63,17 +65,17 @@ export function ServiceList({
   const getStatusBadgeVariant = (status: string) => {
     switch (status) {
       case "SUCCESS":
-        return "default"; // green
+        return "default";
       case "BUILDING":
       case "DEPLOYING":
       case "INITIALIZING":
       case "QUEUED":
-        return "secondary"; // blue/gray
+        return "secondary";
       case "FAILED":
       case "CRASHED":
-        return "destructive"; // red
+        return "destructive";
       case "SLEEPING":
-        return "outline"; // gray outline
+        return "outline";
       default:
         return "secondary";
     }
@@ -97,13 +99,23 @@ export function ServiceList({
     return date.toLocaleDateString();
   };
 
-  const handleSpinUp = (formData: SpinUpFormData) => {
-    console.log("Spinning up service:", formData);
-    // TODO: Implement actual service creation API call
-    // For now, just refresh the services list after a delay
-    setTimeout(() => {
-      fetchServices();
-    }, 1000);
+  const handleSpinUp = async (formData: SpinUpFormData) => {
+    const { serviceName, sourceType, sourceValue, ttl, customTTL } = formData;
+
+    await fetch("/api/services", {
+      method: "POST",
+      body: JSON.stringify({
+        projectId,
+        environmentId,
+        serviceName,
+        sourceType,
+        sourceValue,
+        ttl,
+        customTTL,
+      }),
+    });
+
+    await fetchServices();
   };
 
   if (loading) {
@@ -164,7 +176,7 @@ export function ServiceList({
         <div className="rounded-md border border-red-200 bg-red-50 p-6 text-center">
           <p className="text-red-800 mb-4">{error}</p>
           <Button onClick={fetchServices} variant="outline" size="sm">
-            <RefreshCw className="mr-2 h-4 w-4" />
+            <RefreshCw className="mr-2 size-4" />
             Retry
           </Button>
         </div>
@@ -188,7 +200,7 @@ export function ServiceList({
           </h2>
           <div className="flex gap-2">
             <Button onClick={fetchServices} variant="outline" size="sm">
-              <RefreshCw className="mr-2 h-4 w-4" />
+              <RefreshCw className="mr-2 size-4" />
               Refresh
             </Button>
             <Button
@@ -227,7 +239,7 @@ export function ServiceList({
         <h2 className="text-xl font-semibold">Services in {environmentName}</h2>
         <div className="flex gap-2">
           <Button onClick={fetchServices} variant="outline" size="sm">
-            <RefreshCw className="mr-2 h-4 w-4" />
+            <RefreshCw className="mr-2 size-4" />
             Refresh
           </Button>
           <Button

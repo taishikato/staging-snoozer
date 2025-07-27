@@ -30,6 +30,7 @@ export default function Home() {
 
           {selected && (
             <ServiceList
+              projectId={selected.projectId}
               environmentId={selected.environmentId}
               environmentName={selected.environmentName}
             />
