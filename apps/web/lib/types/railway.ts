@@ -40,3 +40,13 @@ export type SpinUpFormData = {
   ttl?: TTLOption;
   customTTL?: number; // in hours
 };
+
+export type ServiceCreateResponse = {
+  success: boolean;
+  service?: {
+    id: string;
+    name: string;
+    deploymentId?: string;
+  };
+  error?: string;
+};
