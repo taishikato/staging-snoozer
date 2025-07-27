@@ -150,7 +150,7 @@ export function ProjectEnvironmentSelector() {
         <CardContent className="space-y-4">
           <div className="p-6 text-center bg-gray-50 rounded-lg border border-gray-200">
             <div className="text-secondary-foreground text-sm mb-2">
-              You don't have any Railway projects yet.
+              You don&apos;t have any Railway projects yet.
             </div>
             <div className="text-muted-foreground text-sm">
               Create a project in Railway to get started with Staging Snoozer.
