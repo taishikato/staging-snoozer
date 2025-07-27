@@ -16,6 +16,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
 import { useProjectEnvironmentStorage } from "@/lib/hooks/use-project-environment-storage";
 import type { RailwayProject, ProjectsResponse } from "@/lib/types/railway";
 
@@ -95,27 +96,74 @@ export function ProjectEnvironmentSelector() {
           <CardTitle>Project & Environment Selector</CardTitle>
           <CardDescription>Loading your Railway projects...</CardDescription>
         </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
-            <div className="h-10 bg-gray-200 rounded animate-pulse" />
-            <div className="h-10 bg-gray-200 rounded animate-pulse" />
+        <CardContent className="space-y-6">
+          <div className="space-y-2">
+            <Skeleton className="h-4 w-16" />
+            <Skeleton className="h-10 w-full" />
+          </div>
+          <div className="space-y-2">
+            <Skeleton className="h-4 w-20" />
+            <Skeleton className="h-10 w-full" />
           </div>
         </CardContent>
       </Card>
     );
   }
 
+  const retryFetch = () => {
+    setError(null);
+    setLoading(true);
+    window.location.reload();
+  };
+
   if (error) {
     return (
       <Card className="w-full max-w-2xl mx-auto">
         <CardHeader>
           <CardTitle>Project & Environment Selector</CardTitle>
-          <CardDescription>Error loading projects</CardDescription>
+          <CardDescription>
+            Unable to load your Railway projects
+          </CardDescription>
         </CardHeader>
-        <CardContent>
-          <div className="text-red-600">{error}</div>
-          <Button className="mt-4" onClick={() => window.location.reload()}>
-            Retry
+        <CardContent className="space-y-4">
+          <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
+            <div className="text-red-800 text-sm">{error}</div>
+          </div>
+          <div className="text-sm text-gray-600">
+            Please check your Railway API token configuration and try again.
+          </div>
+          <Button onClick={retryFetch} className="w-full">
+            Retry Loading Projects
+          </Button>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  if (projects.length === 0) {
+    return (
+      <Card className="w-full max-w-2xl mx-auto">
+        <CardHeader>
+          <CardTitle>Project & Environment Selector</CardTitle>
+          <CardDescription>No Railway projects found</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="p-6 text-center bg-gray-50 rounded-lg border border-gray-200">
+            <div className="text-secondary-foreground text-sm mb-2">
+              You don't have any Railway projects yet.
+            </div>
+            <div className="text-muted-foreground text-sm">
+              Create a project in Railway to get started with Staging Snoozer.
+            </div>
+          </div>
+          <Button asChild className="w-full">
+            <a
+              href="https://railway.app/new"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              Create Project in Railway
+            </a>
           </Button>
         </CardContent>
       </Card>
@@ -159,28 +207,39 @@ export function ProjectEnvironmentSelector() {
         {selectedProject && (
           <div className="space-y-2">
             <label className="text-sm font-medium">Environment</label>
-            <Select
-              value={selectedEnvironmentId}
-              onValueChange={handleEnvironmentChange}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Select an environment" />
-              </SelectTrigger>
-              <SelectContent>
-                {selectedProject.environments.map((environment) => (
-                  <SelectItem key={environment.id} value={environment.id}>
-                    <div className="flex items-center gap-2">
-                      <span>{environment.name}</span>
-                      {environment.isEphemeral && (
-                        <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">
-                          Ephemeral
-                        </span>
-                      )}
-                    </div>
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            {selectedProject.environments.length === 0 ? (
+              <div className="p-4 text-center bg-yellow-50 rounded-lg border border-yellow-200">
+                <div className="text-yellow-800 text-sm mb-2">
+                  No environments found in this project
+                </div>
+                <div className="text-yellow-700 text-xs">
+                  Create an environment in Railway to continue.
+                </div>
+              </div>
+            ) : (
+              <Select
+                value={selectedEnvironmentId}
+                onValueChange={handleEnvironmentChange}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select an environment" />
+                </SelectTrigger>
+                <SelectContent>
+                  {selectedProject.environments.map((environment) => (
+                    <SelectItem key={environment.id} value={environment.id}>
+                      <div className="flex items-center gap-2">
+                        <span>{environment.name}</span>
+                        {environment.isEphemeral && (
+                          <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">
+                            Ephemeral
+                          </span>
+                        )}
+                      </div>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            )}
           </div>
         )}
 
