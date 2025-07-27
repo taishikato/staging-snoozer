@@ -5,7 +5,8 @@ import { ServiceList } from "@/components/service-list";
 import { useProjectEnvironmentStorage } from "@/lib/hooks/use-project-environment-storage";
 
 export default function Home() {
-  const { selected } = useProjectEnvironmentStorage();
+  const { selected, updateSelection, isLoaded } =
+    useProjectEnvironmentStorage();
 
   return (
     <div className="min-h-screen bg-gray-50 py-12 px-4">
@@ -21,7 +22,11 @@ export default function Home() {
         </div>
 
         <div className="space-y-8">
-          <ProjectEnvironmentSelector />
+          <ProjectEnvironmentSelector
+            selected={selected}
+            updateSelection={updateSelection}
+            isLoaded={isLoaded}
+          />
 
           {selected && (
             <ServiceList

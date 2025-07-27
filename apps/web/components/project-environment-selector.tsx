@@ -17,17 +17,22 @@ import {
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useProjectEnvironmentStorage } from "@/lib/hooks/use-project-environment-storage";
+import type { SelectedProjectEnvironment } from "@/lib/hooks/use-project-environment-storage";
 import type { RailwayProject, ProjectsResponse } from "@/lib/types/railway";
 
-export function ProjectEnvironmentSelector() {
+export function ProjectEnvironmentSelector({
+  selected,
+  updateSelection,
+  isLoaded,
+}: {
+  selected: SelectedProjectEnvironment | null;
+  updateSelection: (selection: SelectedProjectEnvironment | null) => void;
+  isLoaded: boolean;
+}) {
   const [projects, setProjects] = useState<RailwayProject[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedProjectId, setSelectedProjectId] = useState<string>("");
-
-  const { selected, updateSelection, isLoaded } =
-    useProjectEnvironmentStorage();
 
   useEffect(() => {
     async function fetchProjects() {

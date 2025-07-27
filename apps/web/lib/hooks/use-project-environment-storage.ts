@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 
-type SelectedProjectEnvironment = {
+export type SelectedProjectEnvironment = {
   projectId: string;
   projectName: string;
   environmentId: string;
@@ -17,7 +17,6 @@ export function useProjectEnvironmentStorage() {
   );
   const [isLoaded, setIsLoaded] = useState(false);
 
-  // Load from localStorage on mount
   useEffect(() => {
     try {
       const stored = localStorage.getItem(STORAGE_KEY);
@@ -32,7 +31,6 @@ export function useProjectEnvironmentStorage() {
     }
   }, []);
 
-  // Save to localStorage when selection changes
   const updateSelection = (newSelection: SelectedProjectEnvironment | null) => {
     setSelected(newSelection);
 
