@@ -16,3 +16,16 @@ export type ProjectsResponse = {
   projects?: RailwayProject[];
   error?: string;
 };
+
+export type ServiceData = {
+  id: string;
+  name: string;
+  status: string;
+  lastDeployTime?: string;
+};
+
+export type ServicesResponse = {
+  success: boolean;
+  services?: ServiceData[];
+  error?: string;
+};

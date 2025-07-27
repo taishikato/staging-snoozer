@@ -39,3 +39,26 @@ export const EnvironmentsQuery = graphql(`
     }
   }
 `);
+
+export const ServicesQuery = graphql(`
+  query Services($environmentId: String!) {
+    environment(id: $environmentId) {
+      id
+      name
+      serviceInstances {
+        edges {
+          node {
+            id
+            serviceId
+            serviceName
+            latestDeployment {
+              id
+              status
+              createdAt
+            }
+          }
+        }
+      }
+    }
+  }
+`);
