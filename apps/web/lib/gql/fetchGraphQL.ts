@@ -1,14 +1,14 @@
 import { TypedDocumentString } from "./generated/graphql";
 
-interface GraphQLError {
+type GraphQLError = {
   message: string;
   extensions?: Record<string, unknown>;
-}
+};
 
-interface GraphQLResponse<T> {
+type GraphQLResponse<T> = {
   data?: T;
   errors?: GraphQLError[];
-}
+};
 
 export class GraphQLClientError extends Error {
   constructor(
