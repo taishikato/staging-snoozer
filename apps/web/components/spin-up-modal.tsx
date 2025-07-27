@@ -67,7 +67,7 @@ export function SpinUpModal({
       newErrors.sourceValue = "Source is required";
     } else {
       if (formData.sourceType === "github") {
-        const githubUrlPattern = /^https:\/\/github\.com\/[\w.-]+\/[\w.-]+$/;
+        const githubUrlPattern = /^[\w.-]+\/[\w.-]+$/;
         if (!githubUrlPattern.test(formData.sourceValue)) {
           newErrors.sourceValue = "Please enter a valid GitHub repository URL";
         }
@@ -131,7 +131,7 @@ export function SpinUpModal({
   const getSourcePlaceholder = (sourceType: SourceType): string => {
     switch (sourceType) {
       case "github":
-        return "https://github.com/username/repository";
+        return "nextjs/deploy-railway";
       case "docker":
         return "nginx:latest or myregistry/myimage:tag";
       case "template":
