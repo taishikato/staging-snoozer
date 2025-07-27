@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { fetchGraphQL } from "@/lib/gql/fetchGraphQL";
+import { fetchGraphQL } from "@/lib/gql/fetch-graphql";
 import { MeQuery } from "@/lib/gql/queries";
 
 export async function GET() {
