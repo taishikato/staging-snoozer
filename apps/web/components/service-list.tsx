@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import {
   Table,
   TableBody,
@@ -34,7 +34,7 @@ export function ServiceList({
   const [error, setError] = useState<string | null>(null);
   const [showSpinUpModal, setShowSpinUpModal] = useState(false);
 
-  const fetchServices = async () => {
+  const fetchServices = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
@@ -54,11 +54,11 @@ export function ServiceList({
     } finally {
       setLoading(false);
     }
-  };
+  }, [environmentId]);
 
   useEffect(() => {
     fetchServices();
-  }, [environmentId]);
+  }, [environmentId, fetchServices]);
 
   const getStatusBadgeVariant = (status: string) => {
     switch (status) {
