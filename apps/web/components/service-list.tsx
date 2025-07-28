@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import {
   Table,
   TableBody,
@@ -36,6 +36,7 @@ export function ServiceList({
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [showSpinUpModal, setShowSpinUpModal] = useState(false);
+  const pollingIntervalsRef = useRef<Set<NodeJS.Timeout>>(new Set());
 
   const fetchServices = useCallback(async () => {
     try {
@@ -62,6 +63,15 @@ export function ServiceList({
   useEffect(() => {
     fetchServices();
   }, [environmentId, fetchServices]);
+
+  useEffect(() => {
+    return () => {
+      pollingIntervalsRef.current.forEach((interval) =>
+        clearInterval(interval)
+      );
+      pollingIntervalsRef.current.clear();
+    };
+  }, []);
 
   const getStatusBadgeVariant = (status: string) => {
     switch (status) {
@@ -126,6 +136,15 @@ export function ServiceList({
         throw new Error(result.error || "Failed to create service");
       }
 
+      // polling
+      if (result.service?.id && result.service?.deploymentId) {
+        const interval = pollDeploymentStatus(
+          result.service.id,
+          result.service.deploymentId
+        );
+        pollingIntervalsRef.current.add(interval);
+      }
+
       await fetchServices();
     } catch (error) {
       console.error("Error creating service:", error);
@@ -133,6 +152,53 @@ export function ServiceList({
         error instanceof Error ? error.message : "Failed to create service"
       );
     }
+  };
+
+  const pollDeploymentStatus = (serviceId: string, deploymentId: string) => {
+    const maxAttempts = 30; // Poll for up to 5 minutes (30 * 10 seconds)
+    let attempts = 0;
+
+    const pollInterval = setInterval(async () => {
+      attempts++;
+
+      try {
+        const response = await fetch(
+          `/api/services?environmentId=${environmentId}`
+        );
+        const data: ServicesResponse = await response.json();
+
+        if (data.success && data.services) {
+          setServices(data.services);
+
+          const service = data.services.find((s) => s.id === serviceId);
+          if (
+            service &&
+            (service.status === "SUCCESS" ||
+              service.status === "FAILED" ||
+              service.status === "CRASHED")
+          ) {
+            clearInterval(pollInterval);
+            pollingIntervalsRef.current.delete(pollInterval);
+            console.log(
+              `Deployment ${deploymentId} completed with status: ${service.status}`
+            );
+            return;
+          }
+        }
+
+        if (attempts >= maxAttempts) {
+          clearInterval(pollInterval);
+          pollingIntervalsRef.current.delete(pollInterval);
+          console.log(
+            `Stopped polling deployment ${deploymentId} after ${maxAttempts} attempts`
+          );
+        }
+      } catch (error) {
+        console.error("Error polling deployment status:", error);
+      }
+    }, 10000);
+
+    return pollInterval;
   };
 
   if (loading) {
