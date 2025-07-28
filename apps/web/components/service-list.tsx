@@ -155,7 +155,7 @@ export function ServiceList({
   };
 
   const pollDeploymentStatus = (serviceId: string, deploymentId: string) => {
-    const maxAttempts = 30; // Poll for up to 5 minutes (30 * 10 seconds)
+    const maxAttempts = 30;
     let attempts = 0;
 
     const pollInterval = setInterval(async () => {
