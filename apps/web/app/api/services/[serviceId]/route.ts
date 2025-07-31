@@ -13,10 +13,10 @@ class ErrorWithStatus extends Error {
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { serviceId: string } }
+  { params }: { params: Promise<{ serviceId: string }> }
 ) {
   try {
-    const { serviceId } = params;
+    const { serviceId } = await params;
 
     if (!serviceId) {
       throw new ErrorWithStatus("Service ID is required", 400);
