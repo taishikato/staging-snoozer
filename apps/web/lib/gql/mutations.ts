@@ -23,3 +23,15 @@ export const ServiceInstanceDeployMutation = graphql(`
     )
   }
 `);
+
+export const DeploymentStopMutation = graphql(`
+  mutation StopDeploymentMutation($deploymentId: String!) {
+    deploymentStop(id: $deploymentId)
+  }
+`);
+
+export const ServiceDeleteMutation = graphql(`
+  mutation DeleteServiceMutation($serviceId: String!) {
+    serviceDelete(id: $serviceId)
+  }
+`);
