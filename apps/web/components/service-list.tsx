@@ -12,6 +12,22 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { SpinUpModal } from "@/components/spin-up-modal";
 import type {
   ServiceData,
@@ -19,7 +35,7 @@ import type {
   SpinUpFormData,
   ServiceCreateResponse,
 } from "@/lib/types/railway";
-import { RefreshCw, Plus } from "lucide-react";
+import { RefreshCw, Plus, MoreHorizontal, Square, Trash2 } from "lucide-react";
 
 type ServiceListProps = {
   projectId: string;
@@ -36,6 +52,12 @@ export function ServiceList({
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [showSpinUpModal, setShowSpinUpModal] = useState(false);
+  const [confirmDialog, setConfirmDialog] = useState<{
+    open: boolean;
+    action: "stop" | "delete";
+    serviceId: string;
+    serviceName: string;
+  }>({ open: false, action: "stop", serviceId: "", serviceName: "" });
   const pollingIntervalsRef = useRef<Set<NodeJS.Timeout>>(new Set());
 
   const fetchServices = useCallback(async () => {
@@ -201,6 +223,65 @@ export function ServiceList({
     return pollInterval;
   };
 
+  const handleStopService = async (serviceId: string) => {
+    try {
+      const response = await fetch(
+        `/api/services/${serviceId}/stop?environmentId=${environmentId}`,
+        {
+          method: "POST",
+        }
+      );
+
+      const result = await response.json();
+
+      if (!result.success) {
+        throw new Error(result.error || "Failed to stop service");
+      }
+
+      await fetchServices();
+    } catch (error) {
+      console.error("Error stopping service:", error);
+      setError(
+        error instanceof Error ? error.message : "Failed to stop service"
+      );
+    }
+  };
+
+  const handleDeleteService = async (serviceId: string) => {
+    try {
+      const response = await fetch(`/api/services/${serviceId}`, {
+        method: "DELETE",
+      });
+
+      const result = await response.json();
+
+      if (!result.success) {
+        throw new Error(result.error || "Failed to delete service");
+      }
+
+      await fetchServices();
+    } catch (error) {
+      console.error("Error deleting service:", error);
+      setError(
+        error instanceof Error ? error.message : "Failed to delete service"
+      );
+    }
+  };
+
+  const handleConfirmAction = async () => {
+    if (confirmDialog.action === "stop") {
+      await handleStopService(confirmDialog.serviceId);
+    } else {
+      await handleDeleteService(confirmDialog.serviceId);
+    }
+    setConfirmDialog({
+      open: false,
+      action: "stop",
+      serviceId: "",
+      serviceName: "",
+    });
+  };
+
   if (loading) {
     return (
       <div className="w-full space-y-4">
@@ -214,9 +295,10 @@ export function ServiceList({
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead className="w-[40%]">Service</TableHead>
-                <TableHead className="w-[30%]">Status</TableHead>
-                <TableHead className="w-[30%]">Last Deploy</TableHead>
+                <TableHead className="w-[30%]">Service</TableHead>
+                <TableHead className="w-[25%]">Status</TableHead>
+                <TableHead className="w-[25%]">Last Deploy</TableHead>
+                <TableHead className="w-[20%]">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -230,6 +312,9 @@ export function ServiceList({
                   </TableCell>
                   <TableCell>
                     <Skeleton className="h-4 w-24" />
+                  </TableCell>
+                  <TableCell>
+                    <Skeleton className="size-8" />
                   </TableCell>
                 </TableRow>
               ))}
@@ -356,6 +441,45 @@ export function ServiceList({
                 <TableCell className="text-muted-foreground">
                   {formatDeployTime(service.lastDeployTime)}
                 </TableCell>
+                <TableCell>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="ghost" className="h-8 w-8 p-0">
+                        <span className="sr-only">Open menu</span>
+                        <MoreHorizontal className="h-4 w-4" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuItem
+                        onClick={() =>
+                          setConfirmDialog({
+                            open: true,
+                            action: "stop",
+                            serviceId: service.id,
+                            serviceName: service.name,
+                          })
+                        }
+                      >
+                        <Square className="mr-2 h-4 w-4" />
+                        Stop Service
+                      </DropdownMenuItem>
+                      <DropdownMenuItem
+                        onClick={() =>
+                          setConfirmDialog({
+                            open: true,
+                            action: "delete",
+                            serviceId: service.id,
+                            serviceName: service.name,
+                          })
+                        }
+                        className="text-red-600"
+                      >
+                        <Trash2 className="mr-2 h-4 w-4" />
+                        Delete Service
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </TableCell>
               </TableRow>
             ))}
           </TableBody>
@@ -368,6 +492,39 @@ export function ServiceList({
         onSubmit={handleSpinUp}
         environmentName={environmentName}
       />
+
+      <AlertDialog
+        open={confirmDialog.open}
+        onOpenChange={(open) => setConfirmDialog({ ...confirmDialog, open })}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>
+              {confirmDialog.action === "stop"
+                ? "Stop Service"
+                : "Delete Service"}
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              {confirmDialog.action === "stop"
+                ? `Are you sure you want to stop "${confirmDialog.serviceName}"? This will stop the service but keep its configuration.`
+                : `Are you sure you want to delete "${confirmDialog.serviceName}"? This action cannot be undone and will permanently remove the service.`}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleConfirmAction}
+              className={
+                confirmDialog.action === "delete"
+                  ? "bg-red-600 hover:bg-red-700"
+                  : ""
+              }
+            >
+              {confirmDialog.action === "stop" ? "Stop" : "Delete"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
