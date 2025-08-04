@@ -29,13 +29,21 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { SpinUpModal } from "@/components/spin-up-modal";
+import { ScheduleModal } from "@/components/schedule-modal";
 import type {
   ServiceData,
   ServicesResponse,
   SpinUpFormData,
   ServiceCreateResponse,
 } from "@/lib/types/railway";
-import { RefreshCw, Plus, MoreHorizontal, Square, Trash2 } from "lucide-react";
+import {
+  RefreshCw,
+  Plus,
+  MoreHorizontal,
+  Square,
+  Trash2,
+  CalendarClock,
+} from "lucide-react";
 
 type ServiceListProps = {
   projectId: string;
@@ -52,6 +60,11 @@ export function ServiceList({
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [showSpinUpModal, setShowSpinUpModal] = useState(false);
+  const [scheduleModal, setScheduleModal] = useState<{
+    open: boolean;
+    serviceId: string;
+    serviceName: string;
+  }>({ open: false, serviceId: "", serviceName: "" });
   const [confirmDialog, setConfirmDialog] = useState<{
     open: boolean;
     action: "stop" | "delete";
@@ -355,6 +368,14 @@ export function ServiceList({
           onSubmit={handleSpinUp}
           environmentName={environmentName}
         />
+
+        <ScheduleModal
+          serviceId={scheduleModal.serviceId}
+          serviceName={scheduleModal.serviceName}
+          open={scheduleModal.open}
+          onOpenChange={(open) => setScheduleModal({ ...scheduleModal, open })}
+          onSuccess={fetchServices}
+        />
       </div>
     );
   }
@@ -396,6 +417,14 @@ export function ServiceList({
           onOpenChange={setShowSpinUpModal}
           onSubmit={handleSpinUp}
           environmentName={environmentName}
+        />
+
+        <ScheduleModal
+          serviceId={scheduleModal.serviceId}
+          serviceName={scheduleModal.serviceName}
+          open={scheduleModal.open}
+          onOpenChange={(open) => setScheduleModal({ ...scheduleModal, open })}
+          onSuccess={fetchServices}
         />
       </div>
     );
@@ -450,6 +479,18 @@ export function ServiceList({
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
+                      <DropdownMenuItem
+                        onClick={() =>
+                          setScheduleModal({
+                            open: true,
+                            serviceId: service.id,
+                            serviceName: service.name,
+                          })
+                        }
+                      >
+                        <CalendarClock className="mr-2 h-4 w-4" />
+                        Schedule Action
+                      </DropdownMenuItem>
                       <DropdownMenuItem
                         onClick={() =>
                           setConfirmDialog({
@@ -525,6 +566,14 @@ export function ServiceList({
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      <ScheduleModal
+        serviceId={scheduleModal.serviceId}
+        serviceName={scheduleModal.serviceName}
+        open={scheduleModal.open}
+        onOpenChange={(open) => setScheduleModal({ ...scheduleModal, open })}
+        onSuccess={fetchServices}
+      />
     </div>
   );
 }
