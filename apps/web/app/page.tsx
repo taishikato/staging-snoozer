@@ -9,18 +9,8 @@ export default function Home() {
     useProjectEnvironmentStorage();
 
   return (
-    <div className="min-h-screen bg-gray-50 py-12 px-4">
+    <div className="min-h-screen bg-gray-50 py-8 px-4">
       <div className="max-w-4xl mx-auto">
-        <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-primary mb-2">
-            Staging Snoozer
-          </h1>
-          <p className="text-muted-foreground">
-            Manage your Railway staging environments with automatic spin-up and
-            spin-down
-          </p>
-        </div>
-
         <div className="space-y-8">
           <ProjectEnvironmentSelector
             selected={selected}
