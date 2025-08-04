@@ -52,18 +52,18 @@
 - [x] Action menu: Stop (`deploymentStop`) / Delete (`serviceDelete`)
 - [x] Confirm dialogs for destructive ops
 - [x] Refetch list post-action
-- [ ] **Deploy & Smoke Test**: stop/delete work
+- [x] **Deploy & Smoke Test**: stop/delete work
 
 ---
 
 ## Iteration 7 – Introduce Persistence for Rules (Create DB when needed)
 > First time you need a DB → add Drizzle now.
 
-- [ ] Add Drizzle to `apps/web` (or a small server route) with `rules` table
-- [ ] Set up drizzle-kit migration; run locally & on Railway
-- [ ] API routes for rules CRUD (create/list/update/delete)
-- [ ] Rules page (table with status/executeAt/action)
-- [ ] Schedule modal to create a rule
+- [x] Add Drizzle to `apps/web` (or a small server route) with `rules` table
+- [x] Set up drizzle-kit migration; run locally & on Railway
+- [x] API routes for rules CRUD (create/list/update/delete)
+- [x] Rules page (table with status/executeAt/action)
+- [x] Schedule modal to create a rule
 - [ ] **Deploy & Smoke Test**: create rule, verify DB entry
 
 ---
